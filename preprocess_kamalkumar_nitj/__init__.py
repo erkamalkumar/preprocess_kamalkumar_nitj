@@ -1,6 +1,6 @@
 from preprocess_kamalkumar_nitj import utils
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 def get_wordcounts(x):
 	return utils._get_wordcounts(x)
@@ -66,7 +66,7 @@ def remove_common_words(x, freq, n=20):
 	return utils._remove_common_words(x, freq, n)
 
 def remove_rarewords(x, freq, n=20):
-	return utils._remove_rarewords(x, freq n)
+	return utils._remove_rarewords(x, freq, n)
 
 def spelling_correction(x):
 	return utils._spelling_correction(x)
