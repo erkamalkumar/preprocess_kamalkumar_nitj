@@ -8,6 +8,9 @@ from spacy.lang.en.stop_words import STOP_WORDS as stopwords
 from bs4 import BeautifulSoup
 import unicodedata
 from textblob import TextBlob
+
+nlp = spacy.load('en_core_web_sm')
+
 def _get_wordcounts(x):
 	length = len(str(x).split())
 	return length
@@ -39,7 +42,7 @@ def _get_digit_counts(x):
 def _get_uppercase_counts(x):
 	return len([t for t in x.split() if t.isupper()])
 
-def _get_cont_exp(x):
+def _cont_exp(x):
 	contractions = {
 	"'aight" : "alright",
 	"amn't" : "am not",
@@ -243,20 +246,20 @@ def _make_base(x):
 		x_list.append(lemma)
 		return ''.join(x_list)
 
-def _remove_common_words(x,n=20):
-	text = x.split()
-	freq_comm = pd.Series(text).value_counts()
-	fn = freq_comm[:n]
+def _get_value_counts(df, col):
+	text = ' '.join(df[col])
+	text = text.split()
+	freq = pd.series(text).value_counts()
+	return freq
 
+def _remove_common_words(x, freq , n=20):
+	fn = freq[:n]
 	x = ' '.join([t for t in x.split() if t not in fn])
 	return x
 
 
-def _remove_rarewords(x, n=20):
-	text = x.split()
-	freq_comm = pd.Series(text).value_counts()
-	fn = freq_comm.tail(n)	
-
+def _remove_rarewords(x, freq, n=20):
+	fn = freq.tail(n)	
 	x = ' '.join([t for t in x.split() if t not in fn])
 	return x
 
