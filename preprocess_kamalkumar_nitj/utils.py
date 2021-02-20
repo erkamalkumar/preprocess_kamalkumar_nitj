@@ -192,32 +192,32 @@ def _cont_exp(x):
 		return x
 
 def _get_emails(x):
-	emails = re.findall(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+\b)',x)
+	emails = re.findall(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+\b)',str(x))
 	counts = len(emails)
 
 	return counts, emails
 
 
 def _remove_emails(x):
-	return re.sub(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)',"",x)
+	return re.sub(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)',"",str(x))
 
 
 def _get_urls(x):
-	urls = re.findall(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?',x)
+	urls = re.findall(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?',str(x))
 	counts = len(urls)
 
 	return counts, urls
 
 def _remove_urls(x):
-	return re.sub(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', '' , x)
+	return re.sub(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', '' , str(x))
 
 
 def _remove_rt(x):
-	return re.sub(r'\brt\b', '' , x).strip()
+	return re.sub(r'\brt\b', '' , str(x)).strip()
 
 
 def _remove_spacial_chars(x):
-	x = re.sub(r'[^\w ]+', "" , x)
+	x = re.sub(r'[^\w ]+', "" , str(x))
 	x = ' '.join(x.split())
 	return x
 
