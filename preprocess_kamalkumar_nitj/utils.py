@@ -8,8 +8,13 @@ from spacy.lang.en.stop_words import STOP_WORDS as stopwords
 from bs4 import BeautifulSoup
 import unicodedata
 from textblob import TextBlob
+import en_core_web_sm
 
-nlp = spacy.load('en_core_web_sm')
+from sklearn.feature_extraction.text import CountVectorizer
+nlp = en_core_web_sm.load()
+
+path = os.path.dirname(os.path.abspath(__file__))
+abbreviations_path = os.path.join(path, 'data','abbreviations_wordlist.json')
 
 def _get_wordcounts(x):
 	length = len(str(x).split())
@@ -37,7 +42,8 @@ def _get_mentions_counts(x):
 	return l
 
 def _get_digit_counts(x):
-	return len([t for t in x.split() if t.isdigit()])
+	digits = re.findall(r'[0-9,.]+', x)
+	return len(digits)
 
 def _get_uppercase_counts(x):
 	return len([t for t in x.split() if t.isupper()])
@@ -192,18 +198,18 @@ def _cont_exp(x):
 		return x
 
 def _get_emails(x):
-	emails = re.findall(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+\b)',x)
+	emails = re.findall(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+\b)', x)
 	counts = len(emails)
 
 	return counts, emails
 
 
 def _remove_emails(x):
-	return re.sub(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)',"",x)
+	return re.sub(r'([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)',"", x)
 
 
 def _get_urls(x):
-	urls = re.findall(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?',x)
+	urls = re.findall(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', x)
 	counts = len(urls)
 
 	return counts, urls
@@ -211,13 +217,11 @@ def _get_urls(x):
 def _remove_urls(x):
 	return re.sub(r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', '' , x)
 
-
 def _remove_rt(x):
-	return re.sub(r'\brt\b', '' , x).strip()
+	return re.sub(r'\brt\b', '', x).strip()
 
-
-def _remove_spacial_chars(x):
-	x = re.sub(r'[^\w ]+', "" , x)
+def _remove_special_chars(x):
+	x = re.sub(r'[^\w ]+', "", x)
 	x = ' '.join(x.split())
 	return x
 
@@ -266,4 +270,28 @@ def _remove_rarewords(x, freq, n=20):
 
 def _spelling_correction(x):
 	x = TextBlob(x).correct()
-	return x			
+	return x
+
+def _get_basic_features(df):
+	if type(df) == pd.core.frame.DataFrame:
+		df['char_counts'] = df['text'].apply(lambda x: _get_charcounts(x))
+		df['word_counts'] = df['text'].apply(lambda x: _get_wordcounts(x))
+		df['avg_wordlength'] = df['text'].apply(lambda x: _get_avg_wordlength(x))
+		df['stopwords_counts'] = df['text'].apply(lambda x: _get_stopwords_counts(x))
+		df['hashtag_counts'] = df['text'].apply(lambda x: _get_hashtag_counts(x))
+		df['mentions_counts'] = df['text'].apply(lambda x: _get_mentions_counts(x))
+		df['digits_counts'] = df['text'].apply(lambda x: _get_digit_counts(x))
+		df['uppercase_counts'] = df['text'].apply(lambda x: _get_uppercase_counts(x))
+	else:
+		print('ERROR: This function takes only Pandas DataFrame')
+		
+	return df
+
+
+def _get_ngram(df, col, ngram_range):
+	vectorizer = CountVectorizer(ngram_range=(ngram_range, ngram_range))
+	vectorizer.fit_transform(df[col])
+	ngram = vectorizer.vocabulary_
+	ngram = sorted(ngram.items(), key = lambda x: x[1], reverse=True)
+
+	return ngram			

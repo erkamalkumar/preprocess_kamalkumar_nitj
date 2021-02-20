@@ -6,7 +6,7 @@ with open('README.md','r') as file:
 
 setuptools.setup(
 	name = 'preprocess_kamalkumar_nitj',
-	version = '0.0.6',
+	version = '0.0.7',
 	author = 'kamal kumar',
 	author_email = 'erkamalkumar.0001@gmail.com',
 	description = 'This is preprocessing package',
